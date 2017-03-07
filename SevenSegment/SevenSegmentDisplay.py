@@ -32,6 +32,8 @@ class Display(threading.Thread):
     self.running = False
     self.breaks = False
     self.start()
+    self.refreshrate = 50 #HZ
+    self.brightness = 20 # %
 
   def info(self):
     print "Segments are",
@@ -82,8 +84,8 @@ class Display(threading.Thread):
             else:
               seg.off()
           dig.on()
-          time.sleep(0.001)
+          time.sleep( self.brightness / (400.0 * self.refreshrate) )
           dig.off()
-          time.sleep(0.001)
+          time.sleep( (100 - self.brightness) / (400.0 * self.refreshrate) )
       else:
         time.sleep(0.001)
