@@ -8,12 +8,12 @@ lcd.info()
 
 lcd.snake()
 
-lcd.setNumber(1234)
+lcd.displayNumber(1234)
 lcd.on()
 time.sleep(1)
 lcd.off()
 time.sleep(0.5)
-lcd.setNumber(9876)
+lcd.displayNumber(9876)
 lcd.on()
 time.sleep(1)
 

@@ -28,7 +28,7 @@ class Display(threading.Thread):
       led = LED(pin,True) # Digits are active HIGH
       self.digit.append(led)
     
-    self.pattern = [num[' '],num[' '],num[' '],num[' ']]
+    self.displayString("    ")
     self.running = False
     self.breaks = False
     self.start()
@@ -46,12 +46,15 @@ class Display(threading.Thread):
       print led.pin,
     print
 
-  def setNumber(self,nr):
+  def displayString(self,text):
     mypattern=[]
-    nrstring = str(nr)
-    for ch in nrstring:
+    for ch in text:
       mypattern.append(num[ch])
     self.pattern = mypattern
+    
+  def displayNumber(self,nr):
+    nrstring = str(nr)
+    self.displayString(nrstring)
     
   # Go over each segment of each digit    
   def snake(self):
@@ -65,13 +68,16 @@ class Display(threading.Thread):
         #time.sleep(0.01)
 
   def on(self):
-    print "Setting lcd on"
     self.running = True
     
   def off(self):
-    print "Setting lcd off"
     self.running = False
-    
+
+  def _timeOn(self):
+    return self.brightness / (400.0 * self.refreshrate)
+  
+  def _timeOff(self):
+    return (100 - self.brightness) / (400.0 * self.refreshrate)
     
   def run(self):
     while not self.breaks:
@@ -84,8 +90,8 @@ class Display(threading.Thread):
             else:
               seg.off()
           dig.on()
-          time.sleep( self.brightness / (400.0 * self.refreshrate) )
+          time.sleep( self._timeOn() )
           dig.off()
-          time.sleep( (100 - self.brightness) / (400.0 * self.refreshrate) )
+          time.sleep( self._timeOff() )
       else:
         time.sleep(0.001)
