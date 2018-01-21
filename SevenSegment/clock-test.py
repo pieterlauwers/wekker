@@ -3,8 +3,9 @@
 from SevenSegmentDisplay import Display
 import time
 
-lcd = Display([2,3,4,17,27,22,10,9],[14,15,18,23])
-lcd.on()
+lcd = Display([4,10,23,17,15,18,25,27],[14,22,24,9])
+lcd.brightness = 60
+#lcd.on()
 
 while True:
   timestring = time.ctime()

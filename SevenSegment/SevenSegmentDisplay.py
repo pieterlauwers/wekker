@@ -29,11 +29,11 @@ class Display(threading.Thread):
       self.digit.append(led)
     
     self.displayString("    ")
-    self.running = False
-    self.breaks = False
-    self.start()
     self.refreshrate = 50 #HZ
     self.brightness = 20 # %
+    self.breaks = False
+    self.running = True
+    self.start()
 
   def info(self):
     print "Segments are",
@@ -62,7 +62,7 @@ class Display(threading.Thread):
       for s in self.segment:
         s.on()
         d.on()
-        time.sleep(0.04)
+        time.sleep(0.2)
         s.off()
         d.off()
         #time.sleep(0.01)
