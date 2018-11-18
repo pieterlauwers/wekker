@@ -2,7 +2,7 @@
 
 from gpiozero import Button
 
-knop = Button(16)
+knop = Button(12)
 
 def pressed():
   print("pressed")

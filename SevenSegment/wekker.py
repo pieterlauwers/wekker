@@ -28,6 +28,7 @@ while True:
     # Handle events from buttons
     try:
         message = eventq.get(True, 1)      # Get an item from the event queue, raise the empty exception after 1 second
+        print("message: ",message)
         if message == "inc":
             if wheel.pin_btn.is_pressed:
                 alarmtime.inc()
@@ -48,7 +49,8 @@ while True:
             #print "No event handler for ", message
             None
     except Queue.Empty:
-        pass #print "no action"
+        print "no action"
+        #pass #print "no action"
     except KeyboardInterrupt:
         lcd.breaks = True
         sys.exit()

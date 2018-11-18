@@ -28,8 +28,10 @@ class Hourmin():
     self.changetime = now
 
   def inc(self):
+    print("inc")
     self._adjust(1)
 
   def dec(self):
+    print("dec")
     self._adjust(-1)
   
