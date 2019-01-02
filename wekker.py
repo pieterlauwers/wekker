@@ -8,10 +8,10 @@ import time
 from datetime import datetime, timedelta
 import sys
 from gpiozero import Button
-import Queue
+import queue
 
 lcd = Display([4,10,23,17,15,18,25,27],[14,22,24,9])
-eventq = Queue.Queue()
+eventq = queue.Queue()
 wheel = Rotaryencoder(11,7,6,eventq)
 
 alarmtime=Hourmin()
@@ -48,8 +48,8 @@ while True:
         else:
             #print "No event handler for ", message
             None
-    except Queue.Empty:
-        print "no action"
+    except queue.Empty:
+        print("no action")
         #pass #print "no action"
     except KeyboardInterrupt:
         lcd.breaks = True

@@ -36,14 +36,14 @@ class Display(threading.Thread):
     self.start()
 
   def info(self):
-    print "Segments are",
+    print("Segments are")
     for led in self.segment:
-      print led.pin,
+      print(led.pin)
     print
     
-    print "Digits are",
+    print("Digits are")
     for led in self.digit:
-      print led.pin,
+      print(led.pin)
     print
 
   def displayString(self,text):
