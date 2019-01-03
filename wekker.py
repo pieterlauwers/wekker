@@ -25,7 +25,7 @@ def timebetween(t,min,max):
 
 while True:
 
-    # Handle events from buttons
+    # Handle events from the wheel
     try:
         message = eventq.get(True, 1)      # Get an item from the event queue, raise the empty exception after 1 second
         print("message: ",message)

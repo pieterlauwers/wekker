@@ -1,15 +1,13 @@
 #!/usr/bin/python
 
 from rotaryencoder import Rotaryencoder
-import Queue
+from queue import Queue
 
-eventq = Queue.Queue()
+eventq = Queue()
 
-wheel = Rotaryencoder(11,7,6,eventq)
+wheel = Rotaryencoder(11,7,6,name='wheel',queue=eventq)
 
 while True:
     message = eventq.get()
     print(message)
-    print wheel.value
-    
-    
+    print(wheel.value)
