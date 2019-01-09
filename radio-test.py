@@ -3,13 +3,24 @@
 from radio import Radio
 import time
 
-wr = Radio()
-wr.play()
-time.sleep(2)
-print wr.isplaying()
 
-#input("Enter to stop playing.\n")
-time.sleep(10)
-wr.stop()
-print wr.isplaying()
-input("Enter to quit.\n")
+r = Radio()
+r.prepare()
+count = 0
+while not r.isprepared():
+    r.connect()
+    count += 1
+    print("Connect to omxplayer attempt {count}".format(count=count))
+    time.sleep(0.1)
+print("Connected")
+for i in range (6):
+    print("dec")
+    r.dec()
+    time.sleep(0.5)
+for i in range (6):
+    print("inc")
+    r.inc()
+    time.sleep(0.5)
+time.sleep(2)
+print("Time to say goodby")
+r.stop()
