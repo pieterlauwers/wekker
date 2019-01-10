@@ -36,8 +36,9 @@ class Radio():
     try:
       self.omx = OmxControl()
       self.prepared = True
+      return True
     except OmxControlError:
-      pass
+      return False
       
 ##  Pause and resume are apparently not working in this setup
 ##  def play(self):

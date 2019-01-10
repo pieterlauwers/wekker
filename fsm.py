@@ -62,12 +62,16 @@ class States(object):
         if callable(on_exit): callback_functions['on_exit'] = on_exit
         self.states[name] = callback_functions
     def enter(self,name):
+        print('Should I run an on_enter function for state ' + name + '?')
         if name in self.states:
+            print(name + ' state found, looking for on_enter.')
             if 'on_enter' in self.states[name]:
                 print('Performing on_enter action')
                 return self.states[name]['on_enter']()
     def exit(self,name):
+        print('Should I run an on_exit function for state ' + name + '?')
         if name in self.states:
+            print(name + ' state found, looking for on_exit.')
             if 'on_exit' in self.states[name]:
                 print('Performing on_exit action')
                 return self.states[name]['on_exit']()
