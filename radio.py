@@ -17,13 +17,13 @@ class Radio():
 
   def inc(self):
     if self.volume < MAXVOL and self.omx:
-        # print("Volume inc")
+        print("Volume inc")
         self.omx.action(OmxControl.ACTION_INCREASE_VOLUME)
         self.volume += 1
 
   def dec(self):
     if self.volume > MINVOL and self.omx:
-        # print("Volume dec")
+        print("Volume dec")
         self.omx.action(OmxControl.ACTION_DECREASE_VOLUME)
         self.volume -= 1
     

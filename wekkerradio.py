@@ -12,6 +12,7 @@ from datetime import datetime
 from datetime import timedelta
 
 radio = Radio()
+targetvolume=-10
 q = queue.Queue()
 switch = Switch(12,16,name='switch',queue=q)
 wheel = Rotaryencoder(11,7,6,name='wheel',queue=q)
@@ -37,7 +38,7 @@ def prepareradio():
     print('preparing')
     radio.prepare()
     print('Scheduling connect')
-    timer.interval(deltat=timedelta(seconds=1),event='connect',initialtime=timedelta(seconds=10))
+    timer.interval(deltat=timedelta(seconds=1),event='connect',initialtime=timedelta(seconds=0))
 
 def startradio():
     amplifier.on()
@@ -76,8 +77,23 @@ def decalarmtime():
     timer.schedule(timespec=timedelta(seconds=3),event='alarmdisplaytimeout')
     timer.interval(deltat=timedelta(days=1),event='alarm',initialtime=deltaalarm())
 
+def schedulevolume():
+    timer.interval(deltat=timedelta(seconds=0),event='adjustvolume')
+
+def steptotargetvolume():
+    if radio.volume > targetvolume:
+        radio.dec()
+    elif radio.volume < targetvolume:
+        radio.inc()
+    if radio.volume == targetvolume:
+        timer.delete('adjustvolume')
+        return True
+    else:
+        return False
+        
 # Define the states and the transitions in the state machine
 statemachine.append_state('playing',on_enter=startradio,on_exit=stopradio)
+statemachine.append_state('setvolume',on_enter=schedulevolume)
 
 statemachine.append_transition('idle','tick',action=updatetimedisplay)
 statemachine.append_transition('preparing','tick',action=updatetimedisplay)
@@ -85,7 +101,8 @@ statemachine.append_transition('playing','tick',action=updatetimedisplay)
 
 statemachine.append_transition('idle','switch-on',action=prepareradio,dst='preparing')
 statemachine.append_transition('idle','alarm',action=prepareradio,dst='preparing')
-statemachine.append_transition('preparing','connect',condition=radio.connect,dst='playing')
+statemachine.append_transition('preparing','connect',condition=radio.connect,dst='setvolume')
+statemachine.append_transition('setvolume','adjustvolume',condition=steptotargetvolume,dst='playing')
 statemachine.append_transition('playing','switch-off',dst='idle')
 statemachine.append_transition('playing','radiotimeout',dst='idle')
 
