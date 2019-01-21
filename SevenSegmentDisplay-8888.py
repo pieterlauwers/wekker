@@ -9,6 +9,9 @@ lcd = Display([4,10,23,17,15,18,25,27],[14,22,24,9])
 lcd.info()
 
 lcd.displayNumber(8888)
+for i in range(4):
+    lcd.dpOff(i)
+lcd.dpOn(3)
 lcd.on()
 
 input("Press Enter to quit.\n")

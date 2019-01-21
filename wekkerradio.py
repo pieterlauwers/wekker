@@ -12,7 +12,10 @@ from datetime import datetime
 from datetime import timedelta
 
 radio = Radio()
+minvolume=-25
+fadeoutvolume=minvolume
 targetvolume=-10
+fadeinvolume=targetvolume
 q = queue.Queue()
 switch = Switch(12,16,name='switch',queue=q)
 wheel = Rotaryencoder(11,7,6,name='wheel',queue=q)
@@ -33,20 +36,66 @@ def deltanextminute():
 def updatetimedisplay():
     timestring = datetime.now().strftime('%H%M')
     lcd.displayString(timestring)
-
-def prepareradio():
-    print('preparing')
-    radio.prepare()
-    print('Scheduling connect')
-    timer.interval(deltat=timedelta(seconds=1),event='connect',initialtime=timedelta(seconds=0))
-
+    
 def startradio():
-    amplifier.on()
-    print('Delete connect event')
-    timer.delete('connect')
-    print('Schedule radio timeout')
+    """
+    A manual start of the radio
+    Prepare the radio and fadeout to the target volume
+    """
+    lcd.dpOff(3) # Switch is in on mode, so no alarm indicator in the lcd
+    global fadeoutvolume
+    global fadeinvolume
+    radio.prepare()
+    if radio.volume > targetvolume:
+        fadeoutvolume=targetvolume
+    else:
+        fadeoutvolume=radio.volume
+    fadeinvolume=targetvolume
+    timer.interval(deltat=timedelta(seconds=0.1),event='fadeout',initialtime=timedelta(seconds=0))
     timer.schedule(timespec=timedelta(minutes=70),event='radiotimeout')
 
+def handlealarm():
+    global fadeoutvolume
+    global fadeinvolume
+    print('Alarm triggered')
+    radio.prepare()
+    fadeoutvolume=minvolume
+    fadeinvolume=targetvolume
+    timer.schedule(timespec=timedelta(minutes=70),event='radiotimeout')
+    timer.interval(deltat=timedelta(seconds=0.1),event='fadeout',initialtime=timedelta(seconds=0))
+
+def handlefadeout():
+    if radio.volume == fadeoutvolume:
+        timer.delete('fadeout')
+        amplifier.on()
+        timer.interval(deltat=timedelta(seconds=0.5),event='fadein',initialtime=timedelta(seconds=0))
+        print('Fadeout reached ' + str(fadeoutvolume) + '. Turning amplifier on and scheduling fadein.')
+        return True
+    else:
+        radio.dec()
+        print('Volume is ' + str(radio.volume) + '. Fading out till ' + str(fadeoutvolume))
+        return False
+
+def handlefadein():
+    if radio.volume == fadeinvolume:
+        timer.delete('fadein')
+        print('Fadein reached ' + str(fadeinvolume) + '.')
+        return True
+    else:
+        radio.inc()
+        print('Volume is ' + str(radio.volume) + '. Fading in till ' + str(fadeinvolume))
+        return False
+
+def handlevolumeinc():
+    global targetvolume
+    radio.inc()
+    targetvolume = radio.volume
+    
+def handlevolumedec():
+    global targetvolume
+    radio.dec()
+    targetvolume = radio.volume
+    
 def stopradio():
     amplifier.off()
     print('Stopping radio')
@@ -57,6 +106,12 @@ def displayalarmtime():
     lcd.displayString( str(alarmtime) )
     timer.schedule(timespec=timedelta(seconds=3),event='alarmdisplaytimeout')
 
+def alarmindicatoron():
+    lcd.dpOn(3)
+
+def alarmindicatoroff():
+    lcd.dpOff(3)
+    
 def deltaalarm():
     now = datetime.now()
     alarmtoday = datetime(now.year, now.month, now.day, alarmtime.dt.hour, alarmtime.dt.minute)
@@ -76,38 +131,29 @@ def decalarmtime():
     lcd.displayString( str(alarmtime) )
     timer.schedule(timespec=timedelta(seconds=3),event='alarmdisplaytimeout')
     timer.interval(deltat=timedelta(days=1),event='alarm',initialtime=deltaalarm())
-
-def schedulevolume():
-    timer.interval(deltat=timedelta(seconds=0),event='adjustvolume')
-
-def steptotargetvolume():
-    if radio.volume > targetvolume:
-        radio.dec()
-    elif radio.volume < targetvolume:
-        radio.inc()
-    if radio.volume == targetvolume:
-        timer.delete('adjustvolume')
-        return True
-    else:
-        return False
         
 # Define the states and the transitions in the state machine
-statemachine.append_state('playing',on_enter=startradio,on_exit=stopradio)
-statemachine.append_state('setvolume',on_enter=schedulevolume)
+statemachine.append_state('playing',on_exit=stopradio)
 
 statemachine.append_transition('idle','tick',action=updatetimedisplay)
-statemachine.append_transition('preparing','tick',action=updatetimedisplay)
+statemachine.append_transition('fadingout','tick',action=updatetimedisplay)
+statemachine.append_transition('fadingin','tick',action=updatetimedisplay)
 statemachine.append_transition('playing','tick',action=updatetimedisplay)
 
-statemachine.append_transition('idle','switch-on',action=prepareradio,dst='preparing')
-statemachine.append_transition('idle','alarm',action=prepareradio,dst='preparing')
-statemachine.append_transition('preparing','connect',condition=radio.connect,dst='setvolume')
-statemachine.append_transition('setvolume','adjustvolume',condition=steptotargetvolume,dst='playing')
-statemachine.append_transition('playing','switch-off',dst='idle')
+statemachine.append_transition('idle','switch-auto',action=alarmindicatoron)
+statemachine.append_transition('idle','switch-off',action=alarmindicatoroff)
+statemachine.append_transition('playing','switch-auto',action=alarmindicatoron)
+
+statemachine.append_transition('idle','switch-on',action=startradio,dst='fadingout')
+statemachine.append_transition('idle','alarm',action=handlealarm,dst='fadingout')
+statemachine.append_transition('fadingout','fadeout',condition=handlefadeout,dst='fadingin')
+statemachine.append_transition('fadingin','fadein',condition=handlefadein,dst='playing')
+
+statemachine.append_transition('playing','switch-off',action=alarmindicatoroff,dst='idle')
 statemachine.append_transition('playing','radiotimeout',dst='idle')
 
-statemachine.append_transition('playing','wheel-inc',action=radio.inc)
-statemachine.append_transition('playing','wheel-dec',action=radio.dec)
+statemachine.append_transition('playing','wheel-inc',action=handlevolumeinc)
+statemachine.append_transition('playing','wheel-dec',action=handlevolumedec)
 
 statemachine.append_transition('idle','wheel-pushdown',action=displayalarmtime,dst='alarmtime')
 statemachine.append_transition('alarmtime','alarmdisplaytimeout',action=updatetimedisplay,dst='idle')
@@ -116,6 +162,8 @@ statemachine.append_transition('alarmtime','wheel-dec',action=decalarmtime)
 
 # Initial setup
 updatetimedisplay()
+if switch.is_auto():
+    lcd.dpOn(3)
 timer.interval(deltat=timedelta(minutes=1),initialtime=deltanextminute(),event='tick')
 amplifier.off()
 

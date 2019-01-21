@@ -29,6 +29,7 @@ class Display(threading.Thread):
       self.digit.append(led)
     
     self.displayString("    ")
+    self.dp = [False, False, False, False]
     self.refreshrate = 50 #HZ
     self.brightness = 20 # %
     self.breaks = False
@@ -55,6 +56,12 @@ class Display(threading.Thread):
   def displayNumber(self,nr):
     nrstring = str(nr)
     self.displayString(nrstring)
+
+  def dpOn(self,index):
+    self.dp[index] = True
+
+  def dpOff(self,index):
+    self.dp[index] = False
     
   # Go over each segment of each digit    
   def snake(self):
@@ -84,11 +91,16 @@ class Display(threading.Thread):
       if (self.running):
         for digi,dig in enumerate(self.digit):
           tupple = self.pattern[digi]
-          for segi,seg in enumerate(self.segment):
-            if (tupple[segi] == 1):
-              seg.on()
+          #for segi,seg in enumerate(self.segment):
+          for index in range(7):
+            if (tupple[index] == 1):
+              self.segment[index].on()
             else:
-              seg.off()
+              self.segment[index].off()
+          if self.dp[digi]:
+            self.segment[7].on()
+          else:
+            self.segment[7].off()
           dig.on()
           time.sleep( self._timeOn() )
           dig.off()
