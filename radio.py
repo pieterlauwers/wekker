@@ -18,7 +18,7 @@ class Radio():
     def inc(self):
         if self.prepared:
             if self.volume < MAXVOL:
-                print("Volume inc")
+                #print("Volume inc")
                 self.omx.action(OmxControl.ACTION_INCREASE_VOLUME)
                 self.volume += 1
         else:
@@ -27,7 +27,7 @@ class Radio():
     def dec(self):
         if self.prepared:
             if self.volume > MINVOL and self.omx:
-                print("Volume dec")
+                #print("Volume dec")
                 self.omx.action(OmxControl.ACTION_DECREASE_VOLUME)
                 self.volume -= 1
         else:
@@ -35,7 +35,7 @@ class Radio():
         
     def prepare(self):
         if not self.prepared:
-            # print("Radio preparing")
+            # #print("Radio preparing")
             subprocess.Popen(['omxplayer',self.url],stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
 
     def connect(self):
@@ -49,7 +49,7 @@ class Radio():
     ##  Pause and resume are apparently not working in this setup
     ##  def play(self):
     ##    if not self.active:
-    ##        print("Radio started")
+    ##        #print("Radio started")
     ##        self.omx.pause()
     ##        self.active = True
 

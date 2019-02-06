@@ -43,7 +43,7 @@ class Timer:
         if self.nextdelay() == 0:
             first_event = min(self.eventq, key=self.__gettimeof__)
             if 'period' in self.eventq[first_event]:
-                self.eventq[first_event]['time'] += self.eventq[first_event]['period']
+                self.eventq[first_event]['time'] = datetime.now() + self.eventq[first_event]['period']
             else:
                 self.eventq.pop(first_event)
             return first_event

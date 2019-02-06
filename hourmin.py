@@ -15,7 +15,7 @@ class Hourmin():
   def _adjust(self,i):
     now = datetime.now()
     deltat = now - self.changetime 
-    #print("time since last change is ",deltat.microseconds)
+    ##print("time since last change is ",deltat.microseconds)
     if deltat < self.threshlodtime0:
         return  # debouncing
     elif deltat < self.threshlodtime1:
@@ -28,10 +28,10 @@ class Hourmin():
     self.changetime = now
 
   def inc(self):
-    print("inc")
+    #print("inc")
     self._adjust(1)
 
   def dec(self):
-    print("dec")
+    #print("dec")
     self._adjust(-1)
   

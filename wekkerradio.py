@@ -10,6 +10,14 @@ from hourmin import Hourmin
 import time
 from datetime import datetime
 from datetime import timedelta
+import logging
+import logging.handlers
+
+logfilename = '/var/log/wekkerradio/wekkerradio.log'
+log = logging.getLogger('MyLogger')
+log.setLevel(logging.DEBUG)
+handler = logging.handlers.RotatingFileHandler(logfilename, maxBytes=1000000, backupCount=2)
+log.addHandler(handler)
 
 radio = Radio()
 minvolume=-25
@@ -57,7 +65,7 @@ def startradio():
 def handlealarm():
     global fadeoutvolume
     global fadeinvolume
-    print('Alarm triggered')
+    log.debug('Alarm triggered')
     radio.prepare()
     fadeoutvolume=minvolume
     fadeinvolume=targetvolume
@@ -69,21 +77,21 @@ def handlefadeout():
         timer.delete('fadeout')
         amplifier.on()
         timer.interval(deltat=timedelta(seconds=0.5),event='fadein',initialtime=timedelta(seconds=0))
-        print('Fadeout reached ' + str(fadeoutvolume) + '. Turning amplifier on and scheduling fadein.')
+        log.debug('Fadeout reached ' + str(fadeoutvolume) + '. Turning amplifier on and scheduling fadein.')
         return True
     else:
         radio.dec()
-        print('Volume is ' + str(radio.volume) + '. Fading out till ' + str(fadeoutvolume))
+        log.debug('Volume is ' + str(radio.volume) + '. Fading out till ' + str(fadeoutvolume))
         return False
 
 def handlefadein():
     if radio.volume == fadeinvolume:
         timer.delete('fadein')
-        print('Fadein reached ' + str(fadeinvolume) + '.')
+        log.debug('Fadein reached ' + str(fadeinvolume) + '.')
         return True
     else:
         radio.inc()
-        print('Volume is ' + str(radio.volume) + '. Fading in till ' + str(fadeinvolume))
+        log.debug('Volume is ' + str(radio.volume) + '. Fading in till ' + str(fadeinvolume))
         return False
 
 def handlevolumeinc():
@@ -98,7 +106,7 @@ def handlevolumedec():
     
 def stopradio():
     amplifier.off()
-    print('Stopping radio')
+    log.debug('Stopping radio')
     radio.stop()
     timer.delete('radiotimeout')
 
@@ -172,5 +180,5 @@ while True:
         event = q.get(block=True, timeout=timer.nextdelay())
     except queue.Empty:
         event = timer.get()
-    print(event)
+    log.debug(event)
     statemachine.event(event)

@@ -17,18 +17,19 @@ class Transitions(object):
         self.transitions[(src,event)] = eventhandler
     def run(self,src,event):
         if (src,event) in self.transitions:
-            print(event + ' event handler found in ' + src + ' state')
+            #print(event + ' event handler found in ' + src + ' state')
             eventhandler = self.transitions[(src,event)]
             if 'condition' in eventhandler:
-                print('Test condition')
+                #print('Test condition')
                 if not eventhandler['condition'](): return src
             if 'action' in eventhandler:
-                print('Performing action')
+                #print('Performing action')
                 eventhandler['action']()
             if 'dst' in eventhandler:
                 return eventhandler['dst']
         else:
-            print('No event handler for ' + event + ' in ' + src + ' state.')
+            #print('No event handler for ' + event + ' in ' + src + ' state.')
+            pass
         return src
     def condition(self,src,event):
         try:
@@ -62,18 +63,18 @@ class States(object):
         if callable(on_exit): callback_functions['on_exit'] = on_exit
         self.states[name] = callback_functions
     def enter(self,name):
-        print('Should I run an on_enter function for state ' + name + '?')
+        #print('Should I run an on_enter function for state ' + name + '?')
         if name in self.states:
-            print(name + ' state found, looking for on_enter.')
+            #print(name + ' state found, looking for on_enter.')
             if 'on_enter' in self.states[name]:
-                print('Performing on_enter action')
+                #print('Performing on_enter action')
                 return self.states[name]['on_enter']()
     def exit(self,name):
-        print('Should I run an on_exit function for state ' + name + '?')
+        #print('Should I run an on_exit function for state ' + name + '?')
         if name in self.states:
-            print(name + ' state found, looking for on_exit.')
+            #print(name + ' state found, looking for on_exit.')
             if 'on_exit' in self.states[name]:
-                print('Performing on_exit action')
+                #print('Performing on_exit action')
                 return self.states[name]['on_exit']()
 
 
@@ -96,11 +97,11 @@ class Fsm(object):
         self.transitions.append(src,event,condition,action,dst)
 
     def event(self, event):
-        print('Handling ' + event + ' event in ' + self.state + ' state.')
+        #print('Handling ' + event + ' event in ' + self.state + ' state.')
         newstate = self.transitions.run(self.state,event)
         if self.state != newstate:
             self.states.exit(self.state)
             self.states.enter(newstate)
             self.state = newstate
-            print('Now in '+ self.state + ' state')
+            #print('Now in '+ self.state + ' state')
         return self.state
